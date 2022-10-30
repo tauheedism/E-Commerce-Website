@@ -99,9 +99,16 @@ exports.postCart = (req, res, next) => {
       });
     })
     .then(() => {
-      res.redirect("/cart");
+      // res.redirect("/cart");
+      res.status(200).json({success:true,message:'Successfully added to the cart'})
     })
-    .catch((err) => console.log(err));
+    .catch((err) => 
+    { 
+    // console.log(err)
+    res.status(500).json({success:true,message:'Successfully added'})
+
+    }
+    );
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {
