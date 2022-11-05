@@ -1,6 +1,21 @@
 const Products=require('../models/product');
 const cart=require('../models/cart');
 const CartItem=require('../models/cart-item');
+const { response } = require('express');
+
+exports.getIndex = (req, res, next) => {
+  Products.findAll()
+    .then(products => {
+      res.render('shop/index', {
+        prods: products,
+        pageTitle: 'Shop',
+        path: '/'
+      });
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
 
 exports.getProducts = (req, res, next) => {
   Products.findAll()
@@ -26,20 +41,6 @@ exports.getCart = (req, res, next) => {
     })
     .catch(err => console.log(err));
 };
-
-exports.getIndexPagination = (req, res, next) => {
-  let page = Number(req.query.page);
-  let Limit = 2;
-
-    Products.findAll({limit:2,offset:Limit*page})
-      .then(products => {
-        res.json({products , success:true}) 
-      })
-      .catch(err => {
-        console.log(err);
-      });
-  };
-
 
 exports.postCart = (req, res, next) => {
 
@@ -81,6 +82,66 @@ exports.postCart = (req, res, next) => {
       res.status(500).json({ success:false,message:err} ))
 };
 
+exports.getOrders=(req,res,next)=>{
+  req.user.getOrders({include:[{model:Products}]})
+  .then(products=>{
+    res.status(200).json({products:products});
+  })
+  .catch(err=>{
+    console.log(err)
+  })
+}
+
+exports.getCheckout = (req, res, next) => {
+  res.render('shop/checkout', {
+    path: '/checkout',
+    pageTitle: 'Checkout'
+  });
+};
+
+exports.postOrder =  async (req,res,next)=>{
+  let order = await req.user.createOrder() 
+
+  let myOrders = []
+  req.user.getCart()
+  .then(cart=>{
+      console.log('Inside CartItems',cart)
+      cart.getProducts()
+      .then(async(products)=>{
+          console.log('Cart Products',products)
+          for(let i=0;i<products.length;i++) {
+              // console.log('products',products[i])
+             let order_items =   await order.addProduct(products[i] , { 
+                  through : {quantity : products[i].cartItem.quantity} })
+                  myOrders.push(order_items)
+                      console.log(myOrders)
+                 }
+                 CartItem.destroy({where:{cartId : cart.id}})
+                 .then(response=>console.log(response))
+                 res.status(200).json({data: myOrders , success : true})
+               })
+      .catch(err=>console.log(err))
+  })
+  .catch((err)=>{
+       res.status(500).json(err)
+  })
+}
+exports.getIndexPagination = (req, res, next) => {
+  let page = Number(req.query.page);
+  let Limit = 2;
+
+    Products.findAll({limit:2,offset:Limit*page})
+      .then(products => {
+        res.json({products , success:true}) 
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+
+
+
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.params.id;
     CartItem.findAll({where : {productId: prodId}})
@@ -92,3 +153,4 @@ exports.postCartDeleteProduct = (req, res, next) => {
     })
     .catch(err=>res.json({err}))
 };
+
