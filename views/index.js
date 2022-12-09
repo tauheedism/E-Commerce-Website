@@ -191,7 +191,6 @@ function pagination(e) {
                   <button type="button" class="addtocart" id="btn" onClick="addToCartClicked(${prod})">ADD TO CART</button>
                 </div>
              </div>`
-
        }
 
 

@@ -45,7 +45,9 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
+//Associations
+
+Product.belongsTo(User, { constraints: true, onDelete:"CASCADE"});
 User.hasMany(Product);
 User.hasOne(Cart);
 Cart.belongsTo(User);

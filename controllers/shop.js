@@ -126,6 +126,7 @@ exports.postOrder =  async (req,res,next)=>{
        res.status(500).json(err)
   })
 }
+
 exports.getIndexPagination = (req, res, next) => {
   let page = Number(req.query.page);
   let Limit = 2;
@@ -137,10 +138,7 @@ exports.getIndexPagination = (req, res, next) => {
       .catch(err => {
         console.log(err);
       });
-  };
-
-
-
+};
 
 exports.postCartDeleteProduct = (req, res, next) => {
   const prodId = req.params.id;
